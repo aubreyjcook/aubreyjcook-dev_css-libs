@@ -1,12 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>Assembler CSS v0.01</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&amp;family=Silkscreen&amp;display=swap">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
- <h1>css</h1>
+  <main class="asm-shell">
+    <header class="asm-top">
+      <h1 class="asm-brand">Assembler</h1>
+      <span class="asm-dim">v0.01 alpha</span>
+      <button type="button" id="theme-toggle">Light mode</button>
+    </header>
+
+    <p>Terminal interface for hard-edged screens. Amber by default, any palette you set. <span class="asm-caret asm-dim">ready</span></p>
+
+    <nav class="asm-nav" aria-label="Sections">
+      <a href="#controls" aria-current="page">Controls</a>
+      <a href="#readout">Readout</a>
+      <a href="#palette">Palette</a>
+      <a href="#usage">Usage</a>
+    </nav>
+
+    <div class="asm-grid-2">
+      <section class="asm-panel" id="controls">
+        <h2>Controls</h2>
+        <div class="asm-actions">
+          <button type="button" class="asm-solid">Confirm</button>
+          <button type="button">Cancel</button>
+          <button type="button" disabled>Locked</button>
+          <a class="asm-btn" href="#usage">Manual</a>
+        </div>
+        <div class="asm-row" style="margin-top: 0.9rem">
+          <span class="asm-tag">Alpha</span>
+          <span class="asm-tag asm-tag--ok">Nominal</span>
+          <span class="asm-tag asm-tag--warn">Caution</span>
+          <span class="asm-tag asm-tag--danger">Fault</span>
+        </div>
+        <div class="asm-stack" style="margin-top: 0.9rem">
+          <p class="asm-note">Link the stylesheet. Semantic tags pick up the terminal chrome.</p>
+          <p class="asm-note asm-note--ok">System light and dark are both wired. Set <code>data-theme</code> to pin one.</p>
+          <p class="asm-note asm-note--warn">Override <code>--asm-bg</code>, <code>--asm-fg</code>, and <code>--asm-accent</code> to recolor.</p>
+          <p class="asm-note asm-note--danger">Radius stays at zero. Shadows are hard steps, not blur.</p>
+        </div>
+      </section>
+
+      <section class="asm-panel">
+        <h2>Entry</h2>
+        <form class="asm-stack" action="#readout">
+          <label class="asm-field">Callsign
+            <input type="text" name="callsign" value="PIP-04" autocomplete="off">
+          </label>
+          <label class="asm-field">Channel
+            <select name="channel">
+              <option>Amber</option>
+              <option>Phosphor</option>
+              <option>Ice</option>
+            </select>
+          </label>
+          <label class="asm-field">Log
+            <textarea name="log">Hard edges. Configurable color.</textarea>
+          </label>
+          <label class="asm-field">Gain
+            <input type="range" name="gain" min="0" max="100" value="64">
+          </label>
+          <label class="asm-check">
+            <input type="checkbox" id="scan" checked>
+            Scanlines
+          </label>
+          <div class="asm-actions">
+            <button type="submit" class="asm-solid">Write</button>
+            <button type="reset">Clear</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <section class="asm-panel" id="readout">
+      <h2>Readout</h2>
+      <div class="asm-grid-2">
+        <div class="asm-stack">
+          <div>
+            <div class="asm-split"><span>Integrity</span><span>72</span></div>
+            <div class="asm-meter" style="--asm-value: 72%" role="meter" aria-label="Integrity" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72"></div>
+          </div>
+          <div>
+            <div class="asm-split"><span>Signal</span><span>41</span></div>
+            <div class="asm-meter" style="--asm-value: 41%" role="meter" aria-label="Signal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="41"></div>
+          </div>
+          <div>
+            <div class="asm-split"><span>Load</span><span>88</span></div>
+            <div class="asm-meter" style="--asm-value: 88%" role="meter" aria-label="Load" aria-valuemin="0" aria-valuemax="100" aria-valuenow="88"></div>
+          </div>
+          <label class="asm-field">Native meter
+            <progress max="100" value="63">63%</progress>
+          </label>
+        </div>
+        <div class="asm-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Token</th>
+                <th>Dark</th>
+                <th>Light</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>--asm-bg</code></td>
+                <td>#110e09</td>
+                <td>#f3eee4</td>
+              </tr>
+              <tr>
+                <td><code>--asm-fg</code></td>
+                <td>#f3e6c5</td>
+                <td>#1b140c</td>
+              </tr>
+              <tr>
+                <td><code>--asm-accent</code></td>
+                <td>#ffb347</td>
+                <td>#6b2e00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="asm-panel" id="palette">
+      <h2>Palette</h2>
+      <p class="asm-dim">Live overrides on <code>:root</code>. Theme switch clears them.</p>
+      <div class="asm-row">
+        <label class="asm-field">Background
+          <input id="c-bg" type="color" value="#110e09">
+        </label>
+        <label class="asm-field">Foreground
+          <input id="c-fg" type="color" value="#f3e6c5">
+        </label>
+        <label class="asm-field">Accent
+          <input id="c-accent" type="color" value="#ffb347">
+        </label>
+      </div>
+    </section>
+
+    <section class="asm-panel" id="usage">
+      <h2>Usage</h2>
+      <pre><code>&lt;link rel="stylesheet" href="style.css"&gt;
+
+&lt;html data-theme="dark"&gt;
+&lt;style&gt;
+  :root {
+    --asm-bg: #110e09;
+    --asm-fg: #f3e6c5;
+    --asm-accent: #ffb347;
+  }
+&lt;/style&gt;</code></pre>
+      <details style="margin-top: 0.9rem">
+        <summary>What you get</summary>
+        <p>One file. Buttons, fields, tables, and type pick up the chrome on their own. Panels, meters, tags, and notes are classes. Point <code>--asm-font</code> and <code>--asm-display</code> at any face. Omit the webfonts and the stack falls back to the system mono.</p>
+      </details>
+    </section>
+
+    <blockquote>v0.01 is the first alpha. Color is the configuration surface. Light and dark ship together.</blockquote>
+  </main>
+  <script>
+    const root = document.documentElement;
+    const toggle = document.querySelector("#theme-toggle");
+    const scan = document.querySelector("#scan");
+    const fields = {
+      "--asm-bg": document.querySelector("#c-bg"),
+      "--asm-fg": document.querySelector("#c-fg"),
+      "--asm-accent": document.querySelector("#c-accent")
+    };
+
+    function currentTheme() {
+      if (root.dataset.theme === "light" || root.dataset.theme === "dark") {
+        return root.dataset.theme;
+      }
+      return matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+
+    function toHex(value) {
+      const ctx = document.createElement("canvas").getContext("2d");
+      ctx.fillStyle = "#000000";
+      ctx.fillStyle = value.trim();
+      return ctx.fillStyle;
+    }
+
+    function syncPickers() {
+      for (const [name, input] of Object.entries(fields)) {
+        input.value = toHex(getComputedStyle(root).getPropertyValue(name));
+      }
+      toggle.textContent = currentTheme() === "light" ? "Dark mode" : "Light mode";
+    }
+
+    try {
+      const stored = localStorage.getItem("asm-theme");
+      if (stored === "light" || stored === "dark") root.dataset.theme = stored;
+    } catch (err) {
+      /* file pages can block storage; the toggle still works */
+    }
+
+    toggle.addEventListener("click", () => {
+      for (const name of Object.keys(fields)) root.style.removeProperty(name);
+      const next = currentTheme() === "light" ? "dark" : "light";
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem("asm-theme", next);
+      } catch (err) {
+        /* ignore */
+      }
+      syncPickers();
+    });
+
+    for (const [name, input] of Object.entries(fields)) {
+      input.addEventListener("input", () => {
+        root.style.setProperty(name, input.value);
+      });
+    }
+
+    scan.addEventListener("change", () => {
+      if (scan.checked) root.style.removeProperty("--asm-scan-image");
+      else root.style.setProperty("--asm-scan-image", "none");
+    });
+
+    document.querySelector("form").addEventListener("submit", (event) => {
+      event.preventDefault();
+    });
+
+    syncPickers();
+  </script>
 </body>
 </html>
