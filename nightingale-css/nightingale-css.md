@@ -8,3 +8,4 @@ Nightingale CSS is a CSS library.
 
 **Description**
 
+Nightingale CSS is a CSS library that should emphasize an aesthetic of late nights, elegant bedrooms, comfort, and a sense of dreaminess.
