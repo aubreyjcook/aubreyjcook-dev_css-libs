@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>Highway CSS v0.01</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="hw-shell">
+    <header class="hw-top">
+      <h1 class="hw-brand">Highway</h1>
+      <span class="hw-dim">v0.01 alpha</span>
+      <button type="button" id="theme-toggle">Light mode</button>
+    </header>
+
+    <p>The open road, in CSS. Route signs, mile markers, and an odometer glow. <span class="hw-mile">mile 001</span></p>
+
+    <nav class="hw-nav" aria-label="Sections">
+      <a href="#signs" aria-current="page">Signs</a>
+      <a href="#controls">Controls</a>
+      <a href="#readout">Readout</a>
+      <a href="#palette">Palette</a>
+      <a href="#usage">Usage</a>
+    </nav>
+
+    <div class="hw-grid-2">
+      <section class="hw-panel" id="signs">
+        <h2>Signs</h2>
+        <div class="hw-row" style="margin-bottom: 0.9rem">
+          <span class="hw-route">66</span>
+          <span class="hw-route hw-route--info">i-40</span>
+          <span class="hw-route hw-route--warn">!</span>
+          <span class="hw-tag">Alpha</span>
+          <span class="hw-tag hw-tag--ok">Nominal</span>
+          <span class="hw-tag hw-tag--warn">Caution</span>
+          <span class="hw-tag hw-tag--danger">Fault</span>
+        </div>
+        <div class="hw-sign">
+          <h3>Next exit — 12 mi</h3>
+          <p class="hw-dim">Route shields and guide signs are classes, not images.</p>
+        </div>
+        <div class="hw-sign hw-sign--info" style="margin-top: 0.9rem">
+          <h3>Service area ahead</h3>
+          <p class="hw-dim">Blue informational sign.</p>
+        </div>
+        <div class="hw-sign hw-sign--warn" style="margin-top: 0.9rem">
+          <h3>Lonely road — no shoulder</h3>
+          <p class="hw-dim">Yellow warning sign.</p>
+        </div>
+      </section>
+
+      <section class="hw-panel">
+        <h2>Entry</h2>
+        <form class="hw-stack" action="#readout">
+          <label class="hw-field">Callsign
+            <input type="text" name="callsign" value="RT-66" autocomplete="off">
+          </label>
+          <label class="hw-field">Route
+            <select name="route">
+              <option>Interstate</option>
+              <option>State highway</option>
+              <option>Back road</option>
+            </select>
+          </label>
+          <label class="hw-field">Logbook
+            <textarea name="log">Long stretch. Fuel at half.</textarea>
+          </label>
+          <label class="hw-field">Headlights
+            <input type="range" name="gain" min="0" max="100" value="64">
+          </label>
+          <label class="hw-check">
+            <input type="checkbox" id="highbeams" checked>
+            High beams
+          </label>
+          <div class="hw-actions">
+            <button type="submit" class="hw-solid">Depart</button>
+            <button type="reset">Reset</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <section class="hw-panel" id="readout">
+      <h2>Readout</h2>
+      <div class="hw-grid-2">
+        <div class="hw-stack">
+          <div>
+            <div class="hw-split"><span>Fuel</span><span>72</span></div>
+            <div class="hw-meter" style="--hw-value: 72%" role="meter" aria-label="Fuel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72"></div>
+          </div>
+          <div>
+            <div class="hw-split"><span>Distance</span><span>41</span></div>
+            <div class="hw-meter" style="--hw-value: 41%" role="meter" aria-label="Distance" aria-valuemin="0" aria-valuemax="100" aria-valuenow="41"></div>
+          </div>
+          <div>
+            <div class="hw-split"><span>Battery</span><span>88</span></div>
+            <div class="hw-meter" style="--hw-value: 88%" role="meter" aria-label="Battery" aria-valuemin="0" aria-valuemax="100" aria-valuenow="88"></div>
+          </div>
+          <label class="hw-field">Native meter
+            <progress max="100" value="63">63%</progress>
+          </label>
+        </div>
+        <div class="hw-stack">
+          <p class="hw-odometer" style="margin:0">ODO&nbsp;000&nbsp;042&nbsp;118</p>
+          <div class="hw-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Token</th>
+                  <th>Dark</th>
+                  <th>Light</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>--hw-bg</code></td>
+                  <td>#0d0f13</td>
+                  <td>#f2eee4</td>
+                </tr>
+                <tr>
+                  <td><code>--hw-fg</code></td>
+                  <td>#ece7dc</td>
+                  <td>#211d16</td>
+                </tr>
+                <tr>
+                  <td><code>--hw-accent</code></td>
+                  <td>#ffb52e</td>
+                  <td>#c86a00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="hw-road" role="presentation">
+
+    <section class="hw-panel" id="palette">
+      <h2>Palette</h2>
+      <p class="hw-dim">Live overrides on <code>:root</code>. Theme switch clears them.</p>
+      <div class="hw-row">
+        <label class="hw-field">Background
+          <input id="c-bg" type="color" value="#0d0f13">
+        </label>
+        <label class="hw-field">Foreground
+          <input id="c-fg" type="color" value="#ece7dc">
+        </label>
+        <label class="hw-field">Accent
+          <input id="c-accent" type="color" value="#ffb52e">
+        </label>
+      </div>
+    </section>
+
+    <section class="hw-panel" id="usage">
+      <h2>Usage</h2>
+      <pre><code>&lt;link rel="stylesheet" href="style.css"&gt;
+
+&lt;html data-theme="dark"&gt;
+&lt;style&gt;
+  :root {
+    --hw-bg: #0d0f13;
+    --hw-fg: #ece7dc;
+    --hw-accent: #ffb52e;
+  }
+&lt;/style&gt;</code></pre>
+      <details style="margin-top: 0.9rem">
+        <summary>What you get</summary>
+        <p>One file. Semantic tags pick up the road chrome on their own. Signs, route shields, meters, tags, and notes are classes. Point <code>--hw-font</code>, <code>--hw-display</code>, and <code>--hw-mono</code> at any faces. Omit the webfonts and the stacks fall back to system faces.</p>
+      </details>
+    </section>
+
+    <blockquote>v0.01 is the first alpha. Dark and light ship together; the palette is the configuration surface.</blockquote>
+  </main>
+  <script>
+    const root = document.documentElement;
+    const toggle = document.querySelector("#theme-toggle");
+    const highbeams = document.querySelector("#highbeams");
+    const fields = {
+      "--hw-bg": document.querySelector("#c-bg"),
+      "--hw-fg": document.querySelector("#c-fg"),
+      "--hw-accent": document.querySelector("#c-accent")
+    };
+
+    function currentTheme() {
+      if (root.dataset.theme === "light" || root.dataset.theme === "dark") {
+        return root.dataset.theme;
+      }
+      return matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+
+    function toHex(value) {
+      const ctx = document.createElement("canvas").getContext("2d");
+      ctx.fillStyle = "#000000";
+      ctx.fillStyle = value.trim();
+      return ctx.fillStyle;
+    }
+
+    function syncPickers() {
+      for (const [name, input] of Object.entries(fields)) {
+        input.value = toHex(getComputedStyle(root).getPropertyValue(name));
+      }
+      toggle.textContent = currentTheme() === "light" ? "Dark mode" : "Light mode";
+    }
+
+    try {
+      const stored = localStorage.getItem("hw-theme");
+      if (stored === "light" || stored === "dark") root.dataset.theme = stored;
+    } catch (err) {
+      /* file pages can block storage; the toggle still works */
+    }
+
+    toggle.addEventListener("click", () => {
+      for (const name of Object.keys(fields)) root.style.removeProperty(name);
+      const next = currentTheme() === "light" ? "dark" : "light";
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem("hw-theme", next);
+      } catch (err) {
+        /* ignore */
+      }
+      syncPickers();
+    });
+
+    for (const [name, input] of Object.entries(fields)) {
+      input.addEventListener("input", () => {
+        root.style.setProperty(name, input.value);
+      });
+    }
+
+    highbeams.addEventListener("change", () => {
+      /* high beams just demo the checkbox; no visual change in v0.01 */
+    });
+
+    document.querySelector("form").addEventListener("submit", (event) => {
+      event.preventDefault();
+    });
+
+    syncPickers();
+  </script>
+</body>
+</html>

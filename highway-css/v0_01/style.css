@@ -1,0 +1,812 @@
+/* ============================================================================
+   Highway CSS v0.01
+   ----------------------------------------------------------------------------
+   A small, dependency-free stylesheet with the look of the open road:
+   asphalt, faded paint, road signs, mile markers, headlights, and an
+   odometer's steady glow.
+
+   It is plain CSS, so it drops into any stack:
+     - a static HTML page      -> <link rel="stylesheet" href="style.css">
+     - React / Next.js         -> import "./style.css" (or "highway-css/style.css")
+     - Vue / Svelte / Astro    -> same thing, it is just CSS
+
+   HOW THEMING WORKS (read this first, it explains the whole file)
+   ---------------------------------------------------------------
+   Everything visible is driven by *CSS custom properties* (the `--hw-*`
+   variables). A custom property is a named value you set once and reuse
+   everywhere, a bit like a constant in code:
+
+       :root { --hw-accent: #ffb52e; }   /* "declare a constant"     */
+       button { border-color: var(--hw-accent); } /* "read it back"  */
+
+   `:root` is the `<html>` element, so anything declared there is global.
+   Because every rule reads from these variables, you can restyle the entire
+   library by overriding just a few of them in *your* stylesheet.
+
+   THEME SWITCHING
+   ---------------
+   Set an attribute on <html> to force a theme, or leave it off to follow
+   the operating system:
+
+       <html data-theme="dark">   pin to dark (the default look)
+       <html data-theme="light">  pin to light
+       <html>                     follow the OS preference automatically
+
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   DESIGN TOKENS
+   The full set of knobs you may override. Only the first six matter for
+   everyday use; the rest are derived automatically with color-mix().
+   ---------------------------------------------------------------------------- */
+:root {
+  color-scheme: dark;
+
+  /* Typography. You can swap these for any faces you host or prefer. */
+  --hw-font: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --hw-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --hw-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  /* Shape + rhythm. */
+  --hw-radius: 6px;        /* road signs have slightly rounded corners */
+  --hw-size: 16px;         /* base font size */
+  --hw-gap: 0.875rem;      /* spacing between stacked things */
+  --hw-border-w: 2px;      /* stroke width used by borders everywhere */
+
+  /* Palette: "midnight drive" (dark). */
+  --hw-bg: #0d0f13;        /* asphalt at night */
+  --hw-fg: #ece7dc;        /* headlight-washed warm white */
+  --hw-accent: #ffb52e;    /* amber: headlights, warning lamps, links */
+
+  /* Signal colors. Kept intentionally simple. */
+  --hw-danger: #ff5b4d;    /* brake lights / fault */
+  --hw-ok: #5fd98a;        /* green signal / nominal */
+  --hw-warn: #ffd23f;      /* caution yellow */
+
+  /* Road-sign paint. These stay constant across themes so signs always
+     look like signs (a green guide sign is green in daylight too). */
+  --hw-sign: #1f6f3d;      /* guide sign green */
+  --hw-sign-info: #2f6fa8; /* information sign blue */
+  --hw-sign-warn: #ffd23f; /* warning sign yellow */
+  --hw-sign-warn-fg: #1c1a16; /* dark ink on the yellow sign */
+  --hw-sign-fg: #ffffff;   /* text on green/blue signs */
+
+  /* Fixed road paint (roads are dark in both themes). */
+  --hw-asphalt: #22252c;   /* the strip the center line is painted on */
+  --hw-centerline: #ffd23f;/* faded yellow dashes */
+
+  /* Derived tokens. color-mix() blends two colors in a given color space;
+     here it lets us tint "a percentage of fg over bg" without hardcoding
+     a second palette. Override any of these if you prefer exact values. */
+  --hw-bg-raised: color-mix(in srgb, var(--hw-fg) 7%, var(--hw-bg));
+  --hw-fg-dim: color-mix(in srgb, var(--hw-fg) 62%, var(--hw-bg));
+  --hw-line: color-mix(in srgb, var(--hw-fg) 26%, var(--hw-bg));
+  --hw-track: color-mix(in srgb, var(--hw-fg) 12%, var(--hw-bg));
+  --hw-shadow: color-mix(in srgb, #000 42%, transparent);
+  --hw-accent-fg: #171106; /* dark ink that reads well on amber */
+}
+
+/* ----------------------------------------------------------------------------
+   LIGHT THEME ("daylight drive")
+   A theme is just a set of variable overrides. Both of the blocks below say
+   the same thing; the media query is the fallback for people who never set
+   data-theme and have their OS in light mode.
+   ---------------------------------------------------------------------------- */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --hw-bg: #f2eee4;
+  --hw-fg: #211d16;
+  --hw-accent: #c86a00;
+  --hw-danger: #b2361f;
+  --hw-ok: #1d7a3d;
+  --hw-warn: #9a6a00;
+  --hw-accent-fg: #fff7ec;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --hw-bg: #f2eee4;
+    --hw-fg: #211d16;
+    --hw-accent: #c86a00;
+    --hw-danger: #b2361f;
+    --hw-ok: #1d7a3d;
+    --hw-warn: #9a6a00;
+    --hw-accent-fg: #fff7ec;
+  }
+}
+
+/* ============================================================================
+   BASE ELEMENTS
+   Semantic tags get the road look for free: <h1>, <a>, <button>, <table>,
+   <input> and friends are all styled globally. No classes required for the
+   basics; classes are for layout and the themed "sign" components.
+   ========================================================================== */
+
+/* The universal box-sizing rule makes width mean "border-box", so padding
+   and borders are included in width instead of being added on top. This is
+   the single most useful reset for predictable layouts. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--hw-bg);
+  /* A faint headlight glow bleeding down from the top of the page. */
+  background-image: radial-gradient(
+    1200px 520px at 50% -220px,
+    color-mix(in srgb, var(--hw-accent) 12%, transparent),
+    transparent 70%
+  );
+  color: var(--hw-fg);
+  font-family: var(--hw-font);
+  font-size: var(--hw-size);
+  line-height: 1.55;
+  caret-color: var(--hw-accent);
+}
+
+/* Text selection uses the accent so highlighted text feels "lit up". */
+::selection {
+  background: var(--hw-accent);
+  color: var(--hw-accent-fg);
+}
+
+/* Headings use the condensed display face: bold, uppercase, like signage. */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--hw-display);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+h1 { font-size: 1.9rem; margin: 0 0 0.6rem; }
+h2 { font-size: 1.1rem;  margin: 0 0 0.8rem; }
+h3 { font-size: 0.95rem; margin: 0 0 0.5rem; }
+h4 { font-size: 0.85rem; margin: 0 0 0.4rem; }
+
+p { margin: 0 0 0.75rem; }
+
+a {
+  color: var(--hw-accent);
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  background: var(--hw-accent);
+  color: var(--hw-accent-fg);
+  text-decoration: none;
+}
+
+/* Keyboard-only focus gets a visible ring; mouse clicks do not (cleaner). */
+:focus-visible {
+  outline: var(--hw-border-w) solid var(--hw-accent);
+  outline-offset: 2px;
+}
+
+hr {
+  border: 0;
+  border-top: var(--hw-border-w) solid var(--hw-line);
+  margin: var(--hw-gap) 0;
+}
+
+blockquote {
+  margin: 0 0 0.75rem;
+  padding: 0.15rem 0 0.15rem 0.8rem;
+  border-left: var(--hw-border-w) solid var(--hw-accent);
+  color: var(--hw-fg-dim);
+}
+
+code {
+  font-family: var(--hw-mono);
+  font-size: 0.92em;
+  background: var(--hw-track);
+  border: 1px solid var(--hw-line);
+  border-radius: 4px;
+  padding: 0.05em 0.3em;
+  overflow-wrap: anywhere;
+}
+
+pre {
+  overflow: auto;
+  max-width: 100%;
+  margin: 0;
+  padding: 0.8rem;
+  border: var(--hw-border-w) solid var(--hw-line);
+  border-radius: var(--hw-radius);
+  background: var(--hw-bg);
+}
+
+pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+kbd {
+  font-family: var(--hw-mono);
+  font-size: 0.85em;
+  border: var(--hw-border-w) solid var(--hw-line);
+  border-radius: 4px;
+  box-shadow: 0 2px 0 0 var(--hw-shadow);
+  padding: 0.05em 0.35em;
+}
+
+ul,
+ol {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+}
+
+li::marker {
+  color: var(--hw-accent);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  border: var(--hw-border-w) solid var(--hw-line);
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  font-family: var(--hw-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--hw-bg-raised);
+}
+
+/* ============================================================================
+   CONTROLS: buttons, inputs, forms
+   ========================================================================== */
+
+/* Buttons read like little road signs: condensed caps, amber stroke. The
+   `.hw-btn` class lets you make an <a> or <span> look like a button too. */
+button,
+.hw-btn {
+  display: inline-block;
+  appearance: none;
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  border: var(--hw-border-w) solid var(--hw-accent);
+  border-radius: var(--hw-radius);
+  background: transparent;
+  color: var(--hw-accent);
+  font: inherit;
+  font-family: var(--hw-display);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.07em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button:hover,
+.hw-btn:hover {
+  background: var(--hw-accent);
+  color: var(--hw-accent-fg);
+}
+
+/* The "filled" variant inverts the default outline style. */
+.hw-solid {
+  background: var(--hw-accent);
+  color: var(--hw-accent-fg);
+}
+
+.hw-solid:hover {
+  background: transparent;
+  color: var(--hw-accent);
+}
+
+button:active:not(:disabled),
+.hw-btn:active {
+  transform: translateY(1px);
+}
+
+button:disabled,
+.hw-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+label {
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  margin: 0;
+  min-width: 0;
+  max-width: 100%;
+  border: var(--hw-border-w) solid var(--hw-line);
+  border-radius: var(--hw-radius);
+  background-color: var(--hw-bg);
+  color: var(--hw-fg);
+  font: inherit;
+  padding: 0.45rem 0.6rem;
+}
+
+/* Text-like fields stretch to fill their container. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]),
+textarea,
+select {
+  width: 100%;
+}
+
+textarea {
+  min-height: 5.5rem;
+  resize: vertical;
+}
+
+/* Focus: swap the border for the accent and add a soft amber halo. */
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--hw-accent);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--hw-accent) 30%, transparent);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--hw-fg-dim);
+}
+
+/* Keep autofilled fields on-theme instead of the browser's yellow. */
+input:-webkit-autofill {
+  -webkit-text-fill-color: var(--hw-fg);
+  box-shadow: 0 0 0 1000px var(--hw-bg) inset;
+  caret-color: var(--hw-accent);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--hw-accent);
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+}
+
+input[type="color"] {
+  width: 2.75rem;
+  height: 2rem;
+  padding: 0.15rem;
+  background: var(--hw-bg);
+  cursor: pointer;
+}
+
+/* Range inputs need bespoke thumb/track styling per engine. */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+input[type="range"]:focus {
+  box-shadow: none;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  background: var(--hw-track);
+  border: var(--hw-border-w) solid var(--hw-line);
+  border-radius: 999px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  background: var(--hw-accent);
+  border: 0;
+  border-radius: 50%;
+}
+
+input[type="range"]::-moz-range-track {
+  height: 8px;
+  background: var(--hw-track);
+  border: var(--hw-border-w) solid var(--hw-line);
+  border-radius: 999px;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--hw-accent);
+  border: 0;
+  border-radius: 50%;
+}
+
+/* Custom dropdown arrow so the select matches the aesthetic. */
+select {
+  appearance: none;
+  padding-right: 1.8rem;
+  background-image: linear-gradient(var(--hw-accent), var(--hw-accent));
+  background-size: 0.55rem 0.55rem;
+  background-position: right 0.6rem center;
+  background-repeat: no-repeat;
+}
+
+fieldset {
+  margin: 0;
+  border: var(--hw-border-w) solid var(--hw-line);
+  border-radius: var(--hw-radius);
+  padding: 0.75rem;
+}
+
+legend {
+  padding: 0 0.35rem;
+  font-family: var(--hw-display);
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Native <progress> styled as a smooth fuel-gauge bar. */
+progress {
+  appearance: none;
+  width: 100%;
+  height: 0.9rem;
+  border: var(--hw-border-w) solid var(--hw-line);
+  border-radius: 999px;
+  background: var(--hw-track);
+  overflow: hidden;
+}
+
+progress::-webkit-progress-bar {
+  background: var(--hw-track);
+}
+
+progress::-webkit-progress-value {
+  background: var(--hw-accent);
+}
+
+progress::-moz-progress-bar {
+  background: var(--hw-accent);
+}
+
+details {
+  border: var(--hw-border-w) solid var(--hw-line);
+  border-radius: var(--hw-radius);
+  background: var(--hw-bg-raised);
+  padding: 0.6rem 0.75rem;
+}
+
+summary {
+  cursor: pointer;
+  font-family: var(--hw-display);
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ============================================================================
+   LAYOUT + THEMED COMPONENTS
+   Classes with the `hw-` prefix. Layout is a small, intentional grid system;
+   everything else is a themed building block.
+   ========================================================================== */
+
+/* `.hw-shell` is the page frame: centered, with a max width, so content
+   never runs edge-to-edge on huge monitors. */
+.hw-shell {
+  width: min(68rem, calc(100% - 2rem));
+  margin: 1.25rem auto 3rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Prevent grid/flex children from overflowing their tracks. */
+.hw-shell > *,
+.hw-grid-2 > *,
+.hw-stack > * {
+  min-width: 0;
+}
+
+/* `.hw-top` is a header styled like an overhead highway sign. */
+.hw-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  border-radius: var(--hw-radius);
+  background: var(--hw-sign);
+  color: var(--hw-sign-fg);
+  box-shadow: 0 2px 0 0 var(--hw-line), 0 12px 24px -16px var(--hw-shadow);
+}
+
+.hw-top .hw-dim {
+  color: color-mix(in srgb, var(--hw-sign-fg) 78%, transparent);
+}
+
+.hw-brand {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.hw-dim {
+  color: var(--hw-fg-dim);
+}
+
+/* `.hw-odometer` is a mono, amber, softly glowing readout for numbers. */
+.hw-odometer {
+  font-family: var(--hw-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--hw-accent);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--hw-accent) 45%, transparent);
+}
+
+/* `.hw-grid-2` becomes two equal columns once the viewport is wide enough. */
+.hw-grid-2 {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 800px) {
+  .hw-grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.hw-stack {
+  display: grid;
+  gap: var(--hw-gap);
+  align-content: start;
+}
+
+.hw-row,
+.hw-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* `.hw-panel` is the standard surface: a raised "tarmac" card. */
+.hw-panel {
+  padding: 1rem 1.1rem;
+  border: var(--hw-border-w) solid var(--hw-line);
+  border-radius: var(--hw-radius);
+  background: var(--hw-bg-raised);
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, var(--hw-fg) 8%, transparent),
+    0 12px 24px -18px var(--hw-shadow);
+}
+
+.hw-panel > :first-child { margin-top: 0; }
+.hw-panel > :last-child  { margin-bottom: 0; }
+
+/* `.hw-sign` is a full-on road sign: colored field, thick border. */
+.hw-sign {
+  padding: 0.9rem 1.1rem;
+  border: 0.2rem solid var(--hw-fg);
+  border-radius: var(--hw-radius);
+  background: var(--hw-sign);
+  color: var(--hw-sign-fg);
+  box-shadow: 0 3px 0 0 var(--hw-line), 0 14px 28px -18px var(--hw-shadow);
+}
+
+.hw-sign > :is(h1, h2, h3, h4) { color: inherit; }
+.hw-sign .hw-dim { color: color-mix(in srgb, var(--hw-sign-fg) 78%, transparent); }
+
+.hw-sign--info { background: var(--hw-sign-info); }
+
+.hw-sign--warn {
+  background: var(--hw-sign-warn);
+  color: var(--hw-sign-warn-fg);
+  border-color: var(--hw-sign-warn-fg);
+}
+.hw-sign--warn .hw-dim { color: color-mix(in srgb, var(--hw-sign-warn-fg) 72%, transparent); }
+
+/* `.hw-route` is a route shield, like the badge on a highway marker. */
+.hw-route {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.4rem;
+  height: 2.4rem;
+  padding: 0 0.5rem;
+  border: 0.2rem solid var(--hw-fg);
+  border-radius: 0.55rem;
+  background: var(--hw-sign);
+  color: var(--hw-sign-fg);
+  font-family: var(--hw-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+.hw-route--info { background: var(--hw-sign-info); }
+.hw-route--warn { background: var(--hw-sign-warn); color: var(--hw-sign-warn-fg); border-color: var(--hw-sign-warn-fg); }
+
+/* `.hw-mile` is a small mile-marker chip for coordinates and metadata. */
+.hw-mile {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--hw-line);
+  border-radius: 4px;
+  background: var(--hw-bg-raised);
+  color: var(--hw-fg-dim);
+  font-family: var(--hw-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* `.hw-field` wraps a labeled input; the label reads like signage. */
+.hw-field {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--hw-fg-dim);
+  font-family: var(--hw-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* `.hw-check` lays a checkbox/radio next to its label on one line. */
+.hw-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--hw-fg);
+  font-family: var(--hw-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* `.hw-split` is a label/value readout row (e.g. "Fuel  ▏ 41"). */
+.hw-split {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--hw-fg-dim);
+  font-family: var(--hw-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* `.hw-meter` is a segmented gauge. Set the `--hw-value` custom property to
+   a percentage to fill it (0%–100%). */
+.hw-meter {
+  height: 1rem;
+  border: var(--hw-border-w) solid var(--hw-line);
+  border-radius: 999px;
+  overflow: hidden;
+  background-color: var(--hw-track);
+  background-image:
+    repeating-linear-gradient(90deg, transparent 0 12px, var(--hw-bg) 12px 14px),
+    linear-gradient(var(--hw-accent), var(--hw-accent));
+  background-repeat: repeat, no-repeat;
+  background-size: auto, var(--hw-value, 0%) 100%;
+}
+
+/* `.hw-tag` is a small sign-style badge; modifiers recolor it. */
+.hw-tag {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border: var(--hw-border-w) solid var(--hw-accent);
+  border-radius: var(--hw-radius);
+  color: var(--hw-accent);
+  font-family: var(--hw-display);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+.hw-tag--ok     { border-color: var(--hw-ok);     color: var(--hw-ok); }
+.hw-tag--warn   { border-color: var(--hw-warn);   color: var(--hw-warn); }
+.hw-tag--danger { border-color: var(--hw-danger); color: var(--hw-danger); }
+
+/* `.hw-note` is an inline callout with a colored left edge. */
+.hw-note {
+  padding: 0.7rem 0.85rem;
+  border-left: 4px solid var(--hw-accent);
+  border-radius: 0 var(--hw-radius) var(--hw-radius) 0;
+  background: var(--hw-bg-raised);
+}
+.hw-note--ok     { border-color: var(--hw-ok); }
+.hw-note--warn   { border-color: var(--hw-warn); }
+.hw-note--danger { border-color: var(--hw-danger); }
+
+/* `.hw-nav` is a horizontal "route map" of links. */
+.hw-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: var(--hw-border-w) solid var(--hw-line);
+  border-radius: var(--hw-radius);
+  background: var(--hw-bg-raised);
+}
+
+.hw-nav a {
+  padding: 0.45rem 0.8rem;
+  border-radius: calc(var(--hw-radius) - 2px);
+  color: var(--hw-fg);
+  font-family: var(--hw-display);
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.hw-nav a:hover,
+.hw-nav a[aria-current="page"] {
+  background: var(--hw-accent);
+  color: var(--hw-accent-fg);
+}
+
+/* `.hw-road` is a decorative divider that looks like a stretch of road with
+   a dashed yellow center line. Use it as <hr class="hw-road">. */
+.hw-road {
+  height: 2.25rem;
+  border: 0;
+  border-radius: var(--hw-radius);
+  background:
+    repeating-linear-gradient(to right, var(--hw-centerline) 0 2.75rem, transparent 2.75rem 5.5rem),
+    linear-gradient(var(--hw-fg), var(--hw-fg)),
+    linear-gradient(var(--hw-fg), var(--hw-fg)),
+    linear-gradient(var(--hw-asphalt), var(--hw-asphalt));
+  background-position: center, center top, center bottom, center;
+  background-size: 100% 0.22rem, 100% 0.08rem, 100% 0.08rem, 100% 100%;
+  background-repeat: repeat-x, no-repeat, no-repeat, no-repeat;
+}
+
+.hw-table-wrap {
+  overflow-x: auto;
+}
+
+/* Motion: the library is mostly static, but keep this guard so any hover
+   transitions we add later respect the user's reduced-motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

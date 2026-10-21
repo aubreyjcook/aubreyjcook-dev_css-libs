@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <title>Nightingale CSS v0.01</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Karla:ital,wght@0,400;0,600;1,400&family=Caveat:wght@500;600&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="ng-shell">
+    <header class="ng-top">
+      <h1 class="ng-brand">Nightingale</h1>
+      <span class="ng-dream">a late-night lullaby</span>
+      <button type="button" id="theme-toggle">Dawn mode</button>
+    </header>
+
+    <p>Comfort, dreaminess, and the quiet hours. Soft cards, candlelight, and a <span class="ng-moon"></span> glowing moon.</p>
+
+    <nav class="ng-nav" aria-label="Sections">
+      <a href="#dream" aria-current="page">Dream</a>
+      <a href="#controls">Controls</a>
+      <a href="#readout">Readout</a>
+      <a href="#palette">Palette</a>
+      <a href="#usage">Usage</a>
+    </nav>
+
+    <div class="ng-grid-2">
+      <section class="ng-card" id="dream">
+        <h2>A quiet room</h2>
+        <p class="ng-dream" style="margin-bottom: 0.6rem">soft light, no hurry</p>
+        <div class="ng-row" style="margin-bottom: 0.9rem">
+          <span class="ng-tag">Alpha</span>
+          <span class="ng-tag ng-tag--ok">Calm</span>
+          <span class="ng-tag ng-tag--warn">Almost dawn</span>
+          <span class="ng-tag ng-tag--danger">Storm</span>
+        </div>
+        <blockquote>Everything here is rounded, low-contrast, and gentle. Cards float on soft shadows instead of hard edges.</blockquote>
+        <div class="ng-stack" style="margin-top: 0.9rem">
+          <p class="ng-note">Link the stylesheet. Semantic tags pick up the night look.</p>
+          <p class="ng-note ng-note--ok">Dark and light ship together. Set <code>data-theme</code> to pin one.</p>
+          <p class="ng-note ng-note--warn">Override <code>--ng-bg</code>, <code>--ng-fg</code>, and <code>--ng-accent</code> to recolor.</p>
+          <p class="ng-note ng-note--danger">Corners stay rounded and shadows stay soft by design.</p>
+        </div>
+      </section>
+
+      <section class="ng-card">
+        <h2>Entry</h2>
+        <form class="ng-stack" action="#readout">
+          <label class="ng-field">Name
+            <input type="text" name="name" value="Lark" autocomplete="off">
+          </label>
+          <label class="ng-field">Hour
+            <select name="hour">
+              <option>Twilight</option>
+              <option>Midnight</option>
+              <option>Small hours</option>
+            </select>
+          </label>
+          <label class="ng-field">Journal
+            <textarea name="journal">The lamp is low, and the house is quiet.</textarea>
+          </label>
+          <label class="ng-field">Warmth
+            <input type="range" name="warmth" min="0" max="100" value="64">
+          </label>
+          <label class="ng-check">
+            <input type="checkbox" id="lullaby" checked>
+            Soft music
+          </label>
+          <div class="ng-actions">
+            <button type="submit" class="ng-solid">Rest</button>
+            <button type="reset">Clear</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <section class="ng-card" id="readout">
+      <h2>Readout</h2>
+      <div class="ng-grid-2">
+        <div class="ng-stack">
+          <div>
+            <div class="ng-split"><span>Moon phase</span><span>72</span></div>
+            <div class="ng-meter" style="--ng-value: 72%" role="meter" aria-label="Moon phase" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72"></div>
+          </div>
+          <div>
+            <div class="ng-split"><span>Candle</span><span>41</span></div>
+            <div class="ng-meter" style="--ng-value: 41%" role="meter" aria-label="Candle" aria-valuemin="0" aria-valuemax="100" aria-valuenow="41"></div>
+          </div>
+          <div>
+            <div class="ng-split"><span>Cozy</span><span>88</span></div>
+            <div class="ng-meter" style="--ng-value: 88%" role="meter" aria-label="Cozy" aria-valuemin="0" aria-valuemax="100" aria-valuenow="88"></div>
+          </div>
+          <label class="ng-field">Native meter
+            <progress max="100" value="63">63%</progress>
+          </label>
+        </div>
+        <div class="ng-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Token</th>
+                <th>Dark</th>
+                <th>Light</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>--ng-bg</code></td>
+                <td>#191330</td>
+                <td>#f6f1ea</td>
+              </tr>
+              <tr>
+                <td><code>--ng-fg</code></td>
+                <td>#ece6f7</td>
+                <td>#2c2540</td>
+              </tr>
+              <tr>
+                <td><code>--ng-accent</code></td>
+                <td>#c3a3f2</td>
+                <td>#7b5fb8</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="ng-card" id="palette">
+      <h2>Palette</h2>
+      <p class="ng-dim">Live overrides on <code>:root</code>. Theme switch clears them.</p>
+      <div class="ng-row">
+        <label class="ng-field">Background
+          <input id="c-bg" type="color" value="#191330">
+        </label>
+        <label class="ng-field">Foreground
+          <input id="c-fg" type="color" value="#ece6f7">
+        </label>
+        <label class="ng-field">Accent
+          <input id="c-accent" type="color" value="#c3a3f2">
+        </label>
+      </div>
+    </section>
+
+    <section class="ng-card" id="usage">
+      <h2>Usage</h2>
+      <pre><code>&lt;link rel="stylesheet" href="style.css"&gt;
+
+&lt;html data-theme="dark"&gt;
+&lt;style&gt;
+  :root {
+    --ng-bg: #191330;
+    --ng-fg: #ece6f7;
+    --ng-accent: #c3a3f2;
+  }
+&lt;/style&gt;</code></pre>
+      <details style="margin-top: 0.9rem">
+        <summary>What you get</summary>
+        <p>One file. Semantic tags pick up the night look on their own. Cards, tags, notes, meters, and the moon are classes. Point <code>--ng-font</code>, <code>--ng-display</code>, and <code>--ng-script</code> at any faces. Omit the webfonts and the stacks fall back to system faces.</p>
+      </details>
+    </section>
+
+    <blockquote>v0.01 is the first alpha. Dark and light ship together; the palette is the configuration surface.</blockquote>
+  </main>
+  <script>
+    const root = document.documentElement;
+    const toggle = document.querySelector("#theme-toggle");
+    const fields = {
+      "--ng-bg": document.querySelector("#c-bg"),
+      "--ng-fg": document.querySelector("#c-fg"),
+      "--ng-accent": document.querySelector("#c-accent")
+    };
+
+    function currentTheme() {
+      if (root.dataset.theme === "light" || root.dataset.theme === "dark") {
+        return root.dataset.theme;
+      }
+      return matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+
+    function toHex(value) {
+      const ctx = document.createElement("canvas").getContext("2d");
+      ctx.fillStyle = "#000000";
+      ctx.fillStyle = value.trim();
+      return ctx.fillStyle;
+    }
+
+    function syncPickers() {
+      for (const [name, input] of Object.entries(fields)) {
+        input.value = toHex(getComputedStyle(root).getPropertyValue(name));
+      }
+      toggle.textContent = currentTheme() === "light" ? "Midnight mode" : "Dawn mode";
+    }
+
+    try {
+      const stored = localStorage.getItem("ng-theme");
+      if (stored === "light" || stored === "dark") root.dataset.theme = stored;
+    } catch (err) {
+      /* file pages can block storage; the toggle still works */
+    }
+
+    toggle.addEventListener("click", () => {
+      for (const name of Object.keys(fields)) root.style.removeProperty(name);
+      const next = currentTheme() === "light" ? "dark" : "light";
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem("ng-theme", next);
+      } catch (err) {
+        /* ignore */
+      }
+      syncPickers();
+    });
+
+    for (const [name, input] of Object.entries(fields)) {
+      input.addEventListener("input", () => {
+        root.style.setProperty(name, input.value);
+      });
+    }
+
+    document.querySelector("form").addEventListener("submit", (event) => {
+      event.preventDefault();
+    });
+
+    syncPickers();
+  </script>
+</body>
+</html>

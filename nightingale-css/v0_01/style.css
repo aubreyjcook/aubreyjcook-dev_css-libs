@@ -1,0 +1,722 @@
+/* ============================================================================
+   Nightingale CSS v0.01
+   ----------------------------------------------------------------------------
+   A small, dependency-free stylesheet with the feel of a late, comfortable
+   night: deep indigo, soft lavender, a warm candlelight glow, rounded corners,
+   gentle shadows, and a sense of dreaminess.
+
+   It is plain CSS, so it drops into any stack:
+     - a static HTML page      -> <link rel="stylesheet" href="style.css">
+     - React / Next.js         -> import "./style.css" (or "nightingale-css/style.css")
+     - Vue / Svelte / Astro    -> same thing, it is just CSS
+
+   HOW THEMING WORKS (read this first, it explains the whole file)
+   ---------------------------------------------------------------
+   Every visible thing is driven by *CSS custom properties* (the `--ng-*`
+   variables). A custom property is a named value you set once and reuse
+   everywhere, much like a constant in code:
+
+       :root { --ng-accent: #c3a3f2; }        /* "declare a constant"  */
+       a { color: var(--ng-accent); }         /* "read it back"        */
+
+   `:root` is the `<html>` element, so anything declared there is global.
+   Because every rule reads from these variables, you can restyle the whole
+   library by overriding just a few of them in *your* stylesheet.
+
+   THEME SWITCHING
+   ---------------
+   Set an attribute on <html> to force a theme, or leave it off to follow
+   the operating system:
+
+       <html data-theme="dark">   pin to dark (the default look)
+       <html data-theme="light">  pin to light ("dawn")
+       <html>                     follow the OS preference automatically
+
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   DESIGN TOKENS
+   The full set of knobs you may override. Only the first handful matter for
+   everyday use; the rest are derived automatically with color-mix().
+   ---------------------------------------------------------------------------- */
+:root {
+  color-scheme: dark;
+
+  /* Typography. Swap for any faces you host or prefer. */
+  --ng-font: "Karla", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ng-display: "Cormorant Garamond", "Times New Roman", serif;
+  --ng-script: "Caveat", "Comic Sans MS", cursive;
+
+  /* Shape + rhythm. Nightingale is soft: big radius, thin strokes, airy gaps. */
+  --ng-radius: 14px;
+  --ng-size: 16px;
+  --ng-gap: 1rem;
+  --ng-border-w: 1px;
+
+  /* Palette: "midnight" (dark). */
+  --ng-bg: #191330;        /* deep indigo night */
+  --ng-fg: #ece6f7;        /* soft lavender-white */
+  --ng-accent: #c3a3f2;    /* lilac */
+  --ng-warm: #f0d9a6;      /* candlelight / moon glow */
+
+  /* Signal colors, softened so nothing is harsh at night. */
+  --ng-danger: #ff8f8f;
+  --ng-ok: #9fe0b4;
+  --ng-warn: #f2cf8a;
+
+  /* Derived tokens. color-mix() blends two colors in a given color space;
+     here it tints "a percentage of fg over bg" without hardcoding a second
+     palette. Override any of these if you prefer exact values. */
+  --ng-bg-raised: color-mix(in srgb, var(--ng-fg) 8%, var(--ng-bg));
+  --ng-fg-dim: color-mix(in srgb, var(--ng-fg) 60%, var(--ng-bg));
+  --ng-line: color-mix(in srgb, var(--ng-fg) 20%, var(--ng-bg));
+  --ng-track: color-mix(in srgb, var(--ng-fg) 10%, var(--ng-bg));
+  --ng-shadow: color-mix(in srgb, #000 38%, transparent);
+  --ng-glow: color-mix(in srgb, var(--ng-accent) 32%, transparent);
+  --ng-accent-fg: #241838; /* deep ink that reads on lilac */
+}
+
+/* ----------------------------------------------------------------------------
+   LIGHT THEME ("dawn")
+   A theme is just a set of variable overrides. Both blocks below say the same
+   thing; the media query is the fallback for people who never set data-theme
+   and have their OS in light mode.
+   ---------------------------------------------------------------------------- */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ng-bg: #f6f1ea;
+  --ng-fg: #2c2540;
+  --ng-accent: #7b5fb8;
+  --ng-warm: #b98a2f;
+  --ng-danger: #c04b5e;
+  --ng-ok: #3d8a5c;
+  --ng-warn: #a8781f;
+  --ng-accent-fg: #ffffff;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --ng-bg: #f6f1ea;
+    --ng-fg: #2c2540;
+    --ng-accent: #7b5fb8;
+    --ng-warm: #b98a2f;
+    --ng-danger: #c04b5e;
+    --ng-ok: #3d8a5c;
+    --ng-warn: #a8781f;
+    --ng-accent-fg: #ffffff;
+  }
+}
+
+/* ============================================================================
+   BASE ELEMENTS
+   Semantic tags get the night look for free: <h1>, <a>, <button>, <table>,
+   <input> and friends are all styled globally. No classes required for the
+   basics; classes are for layout and the themed "dream" components.
+   ========================================================================== */
+
+/* The universal box-sizing rule makes width mean "border-box", so padding
+   and borders are included in width instead of being added on top. This is
+   the single most useful reset for predictable layouts. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--ng-bg);
+  /* Two soft glows — lilac upper-right, candlelight lower-left — give the
+     page a moonlit, dreamy vignette instead of a flat color. */
+  background-image:
+    radial-gradient(1100px 620px at 82% -12%, color-mix(in srgb, var(--ng-accent) 16%, transparent), transparent 62%),
+    radial-gradient(900px 700px at 8% 112%, color-mix(in srgb, var(--ng-warm) 12%, transparent), transparent 62%);
+  color: var(--ng-fg);
+  font-family: var(--ng-font);
+  font-size: var(--ng-size);
+  line-height: 1.6;
+  caret-color: var(--ng-accent);
+}
+
+/* Text selection uses the accent so highlighted text feels "lit up". */
+::selection {
+  background: var(--ng-accent);
+  color: var(--ng-accent-fg);
+}
+
+/* Headings use the elegant serif: softer and larger than body text. */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--ng-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+h1 { font-size: 2.1rem; margin: 0 0 0.6rem; }
+h2 { font-size: 1.45rem; margin: 0 0 0.8rem; }
+h3 { font-size: 1.15rem; margin: 0 0 0.5rem; }
+h4 { font-size: 1rem;    margin: 0 0 0.4rem; }
+
+p { margin: 0 0 0.8rem; }
+
+a {
+  color: var(--ng-accent);
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  background: var(--ng-accent);
+  color: var(--ng-accent-fg);
+  text-decoration: none;
+  border-radius: 3px;
+}
+
+/* Keyboard-only focus gets a visible ring; mouse clicks do not (cleaner). */
+:focus-visible {
+  outline: var(--ng-border-w) solid var(--ng-accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+hr {
+  border: 0;
+  border-top: var(--ng-border-w) solid var(--ng-line);
+  margin: var(--ng-gap) 0;
+}
+
+blockquote {
+  margin: 0 0 0.8rem;
+  padding: 0.2rem 0 0.2rem 1rem;
+  border-left: 2px solid var(--ng-accent);
+  color: var(--ng-fg-dim);
+  font-family: var(--ng-display);
+  font-size: 1.1rem;
+  font-style: italic;
+}
+
+code {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.9em;
+  background: var(--ng-track);
+  border: var(--ng-border-w) solid var(--ng-line);
+  border-radius: 6px;
+  padding: 0.05em 0.35em;
+  overflow-wrap: anywhere;
+}
+
+pre {
+  overflow: auto;
+  max-width: 100%;
+  margin: 0;
+  padding: 0.9rem;
+  border: var(--ng-border-w) solid var(--ng-line);
+  border-radius: var(--ng-radius);
+  background: var(--ng-bg);
+}
+
+pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+kbd {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.85em;
+  border: var(--ng-border-w) solid var(--ng-line);
+  border-radius: 6px;
+  box-shadow: 0 2px 0 0 var(--ng-shadow);
+  padding: 0.05em 0.35em;
+}
+
+ul,
+ol {
+  margin: 0 0 0.8rem;
+  padding-left: 1.3rem;
+}
+
+li::marker {
+  color: var(--ng-accent);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  border: var(--ng-border-w) solid var(--ng-line);
+  padding: 0.45rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  font-family: var(--ng-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  background: var(--ng-bg-raised);
+}
+
+/* ============================================================================
+   CONTROLS: buttons, inputs, forms
+   ========================================================================== */
+
+/* Buttons are soft pills with a lilac stroke that fills on hover. The
+   `.ng-btn` class lets you make an <a> or <span> look like a button too. */
+button,
+.ng-btn {
+  display: inline-block;
+  appearance: none;
+  margin: 0;
+  padding: 0.6rem 1.1rem;
+  border: var(--ng-border-w) solid var(--ng-accent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ng-accent);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px -2px var(--ng-shadow);
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease;
+}
+
+button:hover,
+.ng-btn:hover {
+  background: var(--ng-accent);
+  color: var(--ng-accent-fg);
+  box-shadow: 0 6px 18px -6px color-mix(in srgb, var(--ng-accent) 60%, transparent);
+}
+
+/* The "filled" variant inverts the default outline style. */
+.ng-solid {
+  background: var(--ng-accent);
+  color: var(--ng-accent-fg);
+}
+
+.ng-solid:hover {
+  background: transparent;
+  color: var(--ng-accent);
+}
+
+button:active:not(:disabled),
+.ng-btn:active {
+  transform: translateY(1px);
+}
+
+button:disabled,
+.ng-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+label {
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  margin: 0;
+  min-width: 0;
+  max-width: 100%;
+  border: var(--ng-border-w) solid var(--ng-line);
+  border-radius: 10px;
+  background-color: var(--ng-bg);
+  color: var(--ng-fg);
+  font: inherit;
+  padding: 0.5rem 0.65rem;
+}
+
+/* Text-like fields stretch to fill their container. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]),
+textarea,
+select {
+  width: 100%;
+}
+
+textarea {
+  min-height: 5.5rem;
+  resize: vertical;
+}
+
+/* Focus: swap the border for the accent and add a soft lilac halo. */
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--ng-accent);
+  outline: none;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ng-accent) 22%, transparent);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--ng-fg-dim);
+}
+
+/* Keep autofilled fields on-theme instead of the browser's yellow. */
+input:-webkit-autofill {
+  -webkit-text-fill-color: var(--ng-fg);
+  box-shadow: 0 0 0 1000px var(--ng-bg) inset;
+  caret-color: var(--ng-accent);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--ng-accent);
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+}
+
+input[type="color"] {
+  width: 2.75rem;
+  height: 2rem;
+  padding: 0.15rem;
+  background: var(--ng-bg);
+  cursor: pointer;
+}
+
+/* Range inputs need bespoke thumb/track styling per engine. */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+input[type="range"]:focus {
+  box-shadow: none;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  background: var(--ng-track);
+  border: var(--ng-border-w) solid var(--ng-line);
+  border-radius: 999px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  background: var(--ng-accent);
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--ng-glow);
+}
+
+input[type="range"]::-moz-range-track {
+  height: 8px;
+  background: var(--ng-track);
+  border: var(--ng-border-w) solid var(--ng-line);
+  border-radius: 999px;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--ng-accent);
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--ng-glow);
+}
+
+/* Custom dropdown arrow so the select matches the aesthetic. */
+select {
+  appearance: none;
+  padding-right: 1.8rem;
+  background-image: linear-gradient(var(--ng-accent), var(--ng-accent));
+  background-size: 0.55rem 0.55rem;
+  background-position: right 0.6rem center;
+  background-repeat: no-repeat;
+}
+
+fieldset {
+  margin: 0;
+  border: var(--ng-border-w) solid var(--ng-line);
+  border-radius: var(--ng-radius);
+  padding: 0.85rem;
+}
+
+legend {
+  padding: 0 0.4rem;
+  font-family: var(--ng-display);
+  font-size: 1rem;
+}
+
+/* Native <progress> styled as a soft, glowing bar. */
+progress {
+  appearance: none;
+  width: 100%;
+  height: 0.85rem;
+  border: var(--ng-border-w) solid var(--ng-line);
+  border-radius: 999px;
+  background: var(--ng-track);
+  overflow: hidden;
+}
+
+progress::-webkit-progress-bar {
+  background: var(--ng-track);
+}
+
+progress::-webkit-progress-value {
+  background: var(--ng-accent);
+}
+
+progress::-moz-progress-bar {
+  background: var(--ng-accent);
+}
+
+details {
+  border: var(--ng-border-w) solid var(--ng-line);
+  border-radius: var(--ng-radius);
+  background: var(--ng-bg-raised);
+  padding: 0.65rem 0.85rem;
+}
+
+summary {
+  cursor: pointer;
+  font-family: var(--ng-display);
+  font-size: 1.05rem;
+}
+
+/* ============================================================================
+   LAYOUT + THEMED COMPONENTS
+   Classes with the `ng-` prefix. Layout is a small, intentional grid system;
+   everything else is a themed building block.
+   ========================================================================== */
+
+/* `.ng-shell` is the page frame: centered, with a max width, so content
+   never runs edge-to-edge on huge monitors. */
+.ng-shell {
+  width: min(68rem, calc(100% - 2rem));
+  margin: 1.5rem auto 3.5rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Prevent grid/flex children from overflowing their tracks. */
+.ng-shell > *,
+.ng-grid-2 > *,
+.ng-stack > * {
+  min-width: 0;
+}
+
+/* `.ng-top` is a soft header card. */
+.ng-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.8rem 1.1rem;
+  border: var(--ng-border-w) solid var(--ng-line);
+  border-radius: var(--ng-radius);
+  background: var(--ng-bg-raised);
+  box-shadow: 0 8px 24px -18px var(--ng-shadow);
+}
+
+.ng-brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.ng-dim {
+  color: var(--ng-fg-dim);
+}
+
+/* `.ng-dream` is a script accent — a handwritten flourish for slogans,
+   labels, or asides. */
+.ng-dream {
+  font-family: var(--ng-script);
+  font-size: 1.4em;
+  line-height: 1.05;
+  color: var(--ng-accent);
+}
+
+/* `.ng-moon` is a decorative glowing moon. */
+.ng-moon {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: var(--ng-warm);
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--ng-warm) 16%, transparent),
+    0 0 22px 5px color-mix(in srgb, var(--ng-warm) 34%, transparent);
+}
+
+/* `.ng-grid-2` becomes two equal columns once the viewport is wide enough. */
+.ng-grid-2 {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 800px) {
+  .ng-grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.ng-stack {
+  display: grid;
+  gap: var(--ng-gap);
+  align-content: start;
+}
+
+.ng-row,
+.ng-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* `.ng-card` is the standard surface: a soft, floating card. */
+.ng-card {
+  padding: 1.15rem 1.3rem;
+  border: var(--ng-border-w) solid var(--ng-line);
+  border-radius: var(--ng-radius);
+  background: var(--ng-bg-raised);
+  box-shadow: 0 10px 30px -22px var(--ng-shadow);
+}
+
+.ng-card > :first-child { margin-top: 0; }
+.ng-card > :last-child  { margin-bottom: 0; }
+
+/* `.ng-field` wraps a labeled input; the label is quiet and comfortable. */
+.ng-field {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--ng-fg-dim);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* `.ng-check` lays a checkbox/radio next to its label on one line. */
+.ng-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ng-fg);
+  font-weight: 600;
+}
+
+/* `.ng-split` is a label/value readout row (e.g. "Moon phase  ▏ 72"). */
+.ng-split {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--ng-fg-dim);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* `.ng-meter` is a soft, glowing bar. Set the `--ng-value` custom property to
+   a percentage to fill it (0%–100%). */
+.ng-meter {
+  height: 0.85rem;
+  border: var(--ng-border-w) solid var(--ng-line);
+  border-radius: 999px;
+  overflow: hidden;
+  background-color: var(--ng-track);
+  background-image: linear-gradient(var(--ng-accent), var(--ng-accent));
+  background-repeat: no-repeat;
+  background-size: var(--ng-value, 0%) 100%;
+  box-shadow: inset 0 1px 2px var(--ng-shadow);
+}
+
+/* `.ng-tag` is a small pastel badge; modifiers recolor it. */
+.ng-tag {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border: var(--ng-border-w) solid var(--ng-accent);
+  border-radius: 999px;
+  color: var(--ng-accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.ng-tag--ok     { border-color: var(--ng-ok);     color: var(--ng-ok); }
+.ng-tag--warn   { border-color: var(--ng-warn);   color: var(--ng-warn); }
+.ng-tag--danger { border-color: var(--ng-danger); color: var(--ng-danger); }
+
+/* `.ng-note` is a soft inline callout with a colored left edge. */
+.ng-note {
+  padding: 0.75rem 0.9rem;
+  border-left: 3px solid var(--ng-accent);
+  border-radius: 0 var(--ng-radius) var(--ng-radius) 0;
+  background: var(--ng-bg-raised);
+}
+.ng-note--ok     { border-color: var(--ng-ok); }
+.ng-note--warn   { border-color: var(--ng-warn); }
+.ng-note--danger { border-color: var(--ng-danger); }
+
+/* `.ng-nav` is a soft horizontal row of links. */
+.ng-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding: 0.3rem;
+  border: var(--ng-border-w) solid var(--ng-line);
+  border-radius: 999px;
+  background: var(--ng-bg-raised);
+}
+
+.ng-nav a {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  color: var(--ng-fg);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ng-nav a:hover,
+.ng-nav a[aria-current="page"] {
+  background: var(--ng-accent);
+  color: var(--ng-accent-fg);
+}
+
+.ng-table-wrap {
+  overflow-x: auto;
+}
+
+/* Motion: transitions are already gentle, but keep this guard so any hover
+   or glow animations respect the user's reduced-motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
